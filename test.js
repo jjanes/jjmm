@@ -1,8 +1,39 @@
 var net = require('net');
-const express = require('express');
+var express = require('express');
+var tpl = require('nunjucks');
 
 const HOST = '192.168.1.27';
 const PORT = 3000;
+
+const PREC = 2;
+
+var app = express();
+
+var PATH_TO_TEMPLATES = './templates' ;
+
+tpl.configure( PATH_TO_TEMPLATES, {
+    autoescape: true,
+    watch: true,
+});
+
+var Scr
+
+app.get('/', (req, res) => {
+    try {
+        ret = tpl.render("index.html",{stats: stats});
+        res.send(ret);
+    } catch (e) { 
+        res.send('error: '+e);
+    }
+});
+
+app.listen(3000, () => console.log('Example app listening on port 3000!'))
+
+function precisionRound(number, precision) {
+    var factor = Math.pow(10, precision);
+    return Math.round(number * factor) / factor;
+  }
+  
 
 /*
 "9.3 - ETH"				- miner version.
@@ -49,12 +80,25 @@ setInterval(() => {
                 hashrates.forEach((element, index) => {
                     avg += parseInt(element);
                     stats.gpus[index] = {
-                        hashrate: element/1024,
+                        hashrate: precisionRound( element/1024, PREC),
                         fan_speed: 0,
                         tempature: 0
                     }
                 });
-                stats.average = (avg / parseInt(stats.gpus.length))/1024;
+
+
+                var info = a[2].toString().split(';');
+
+                try {
+                    stats.average = precisionRound( info[0]/1024, PREC);
+                    stats.shares = info[1];
+                    stats.bad_shares = info[2];
+            
+                } catch (e) { 
+                    console.log(e);
+                }
+
+                // stats.average = precisionRound( (avg / parseInt(stats.gpus.length))/1024, 4) ;
 
                 s.forEach((e,index) => {
                     var s = e.split(';');

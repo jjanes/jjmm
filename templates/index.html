@@ -1,0 +1,34 @@
+<html>
+
+<head>
+   <style>
+       .gpu {
+           padding: 20px;
+           margin: 10px;
+           background-color: beige;
+           width: 200px;
+           float: left;
+       }
+   </style> 
+</head>
+<body>
+<div>
+    <div>uptime: {{ stats.uptime }}</div>
+    <div>average hashrate: {{ stats.average }} MH/s</div>
+    <div>total shares: {{ stats.shares }}</div>
+    <div>bad shares: {{ stats.bad_shares }}</div>
+</div>
+{% for gpu in stats.gpus %}
+<div class="gpu">
+    <div>hashrate: {{ gpu.hashrate }} MH/s</div>
+    <div>fan speed: {{ gpu.fan_speed }}</div>
+    <div>tempature: {{ gpu.tempature }} </div>
+</div>
+{% endfor %}
+<script type="text/javascript">
+    setTimeout(() => {
+        location.reload();
+    },3000);
+</script>
+</body>
+</html>
