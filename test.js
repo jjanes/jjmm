@@ -1,6 +1,7 @@
 var net = require('net');
 var express = require('express');
 var tpl = require('nunjucks');
+var sqlite = require('sqlite3');
 
 const HOST = '192.168.1.27';
 const PORT = 3000;
@@ -16,7 +17,7 @@ tpl.configure( PATH_TO_TEMPLATES, {
     watch: true,
 });
 
-var Scr
+app.use(express.static('public'))
 
 app.get('/', (req, res) => {
     try {
@@ -33,7 +34,23 @@ function precisionRound(number, precision) {
     var factor = Math.pow(10, precision);
     return Math.round(number * factor) / factor;
   }
+  function fancyTimeFormat(time) {   
+      // Hours, minutes and seconds
+      var hrs = ~~(time / 3600);
+      var mins = ~~((time % 3600) / 60);
+      var secs = time % 60;
   
+      // Output like "1:01" or "4:03:59" or "123:03:59"
+      var ret = "";
+  
+      if (hrs > 0) {
+          ret += "" + hrs + ":" + (mins < 10 ? "0" : "");
+      }
+  
+      ret += "" + mins + ":" + (secs < 10 ? "0" : "");
+      ret += "" + secs;
+      return ret;
+  }
 
 /*
 "9.3 - ETH"				- miner version.
@@ -70,7 +87,7 @@ setInterval(() => {
                 var hashrates = a[3].toString().split(';');
                 
                 stats = {
-                    uptime: a[1],
+                    uptime: fancyTimeFormat( a[1] ),
                     gpus: []
                 };
                 

@@ -1,0 +1,13 @@
+       .gpu {
+           padding: 20px;
+           margin: 10px;
+           background-color: beige;
+           float: left;
+           box-sizing: content-box;
+       }
+       .good-info {
+           color: #ffffff;
+       }
+       .bad-info {
+           color: red;
+       }

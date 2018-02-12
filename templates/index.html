@@ -1,34 +1,38 @@
 <html>
-
 <head>
-   <style>
-       .gpu {
-           padding: 20px;
-           margin: 10px;
-           background-color: beige;
-           width: 200px;
-           float: left;
-       }
-   </style> 
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+
 </head>
+
 <body>
-<div>
-    <div>uptime: {{ stats.uptime }}</div>
-    <div>average hashrate: {{ stats.average }} MH/s</div>
-    <div>total shares: {{ stats.shares }}</div>
-    <div>bad shares: {{ stats.bad_shares }}</div>
-</div>
-{% for gpu in stats.gpus %}
-<div class="gpu">
-    <div>hashrate: {{ gpu.hashrate }} MH/s</div>
-    <div>fan speed: {{ gpu.fan_speed }}</div>
-    <div>tempature: {{ gpu.tempature }} </div>
-</div>
-{% endfor %}
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <p class="navbar-text">UPTIME: <span class="good-info">{{ stats.uptime }}</span></p>
+                <p class="navbar-text">Hashrate(AVG): <span class="good-info">{{ stats.average }}</span> MH/s</p>
+                <p class="navbar-text" >Shares: <span class="good-info">{{ stats.shares }}</span>/<span class="bad-info">{{ stats.bad_shares }}</span></p>
+            </div>
+            <ul class="nav navbar-nav navbar-right">  
+                <li><a href="/miners" class="navbar-link">Miners</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+    {% for gpu in stats.gpus %}
+    <div class="gpu">
+        <div>hashrate: {{ gpu.hashrate }} MH/s</div>
+        <div>fan speed: {{ gpu.fan_speed }}</div>
+        <div>tempature: {{ gpu.tempature }}&#8451;</div>
+    </div>
+    {% endfor %}
+    </div>
 <script type="text/javascript">
-    setTimeout(() => {
-        location.reload();
-    },3000);
-</script>
+        setTimeout(() => {
+            location.reload();
+        }, 3000);
+    </script>
 </body>
 </html>
