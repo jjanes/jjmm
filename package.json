@@ -1,0 +1,16 @@
+{
+  "name": "jjmm",
+  "version": "1.0.0",
+  "description": "",
+  "main": "jjmm.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "john janes",
+  "license": "ISC",
+  "dependencies": {
+    "angular4": "^1.0.0",
+    "express": "^4.16.2",
+    "sqlite3": "^3.1.13"
+  }
+}
