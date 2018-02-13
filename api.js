@@ -3,21 +3,21 @@ const express = require('express');
 const tpl = require('nunjucks');
 const bodyParser = require('body-parser')
 
-const config = { 
+const config = {
     host: '192.168.1.17',
     user: 'john',
     password: 'whatis321',
     database: 'john'
 };
 
-var PATH_TO_TEMPLATES = './templates' ;
+var PATH_TO_TEMPLATES = './templates';
 
 const pg = {
     client: null,
     init: () => {
-        this.client = new Client(config);
+        pg.client = new Client(config);
 
-        this.client.connect((err) => {
+        pg.client.connect((err) => {
             if (err) {
                 console.error('connection error', err.stack);
             } else {
@@ -31,7 +31,7 @@ const pg = {
                 console.log(err ? err.stack : res.rows[0].message) // Hello World!
                 // client.end()
 
-           });            
+            });
 
         }
     },
@@ -43,49 +43,46 @@ const api = {
     init: () => {
         this.app = express();
 
-        this.app.use(function (req,res,next) {
+        this.app.use(function (req, res, next) {
             req.raw = '';
-            req.on('data', function(data) { req.raw += data.toString('utf8'); });
+            req.on('data', function (data) { req.raw += data.toString('utf8'); });
             next();
         });
-        
-        this.app.use(bodyParser.json());
-        this.app.use(bodyParser.urlencoded({ extended: true })); 
 
-        tpl.configure( PATH_TO_TEMPLATES, {
+        this.app.use(bodyParser.json());
+        this.app.use(bodyParser.urlencoded({ extended: true }));
+
+        tpl.configure(PATH_TO_TEMPLATES, {
             autoescape: true,
             watch: true,
         });
-        
+
         this.app.use(express.static('public'))
 
         try {
             this.app.post('/v1/log/:rig_id', (req, res) => {
-                var rig_id = req.params.rig_id;
+                var rig_id = parseInt(req.params.rig_id);
 
                 var arr = { uptime: 0, rig_id: 0, data: '' };
 
-                console.log(req.raw);
-
                 try {
                     var json = JSON.parse(req.raw);
-                    console.log('blah')
-                    pg.client.query('INSERT INTO jjmm_log (rig_id,data,hashrate,uptime,shares,bad_shares) values($1,$2,$3,$4,$5,$6)',
-                        [rig_id, req.raw, json.average, json.uptime, json.shares, json.bad_shares], (err, res) => {
-                            console.log()
-                            if (err) {
-                                console.log(err);
-
-                            } else { 
-                                var id = res.rows[0].id;
-                                json.cpus.foreach((stats, index) => {
-                                    var arr = [id,index,1,stats.tempature];
-                                    pg.client.query('INSERT INTO jjm_gpu_log (log_id, gpu, type, value) values ($1,$2,$3,$4)',arr);
-                                    var arr = [id,index,2,stats.fan_speed];
-                                    pg.client.query('INSERT INTO jjm_gpu_log (log_id, gpu, type, value) values ($1,$2,$3,$4)',arr);
+                    var arr = [rig_id, req.raw, json.average, json.uptime, json.shares, json.bad_shares];
+                    pg.client.query('INSERT INTO jjmm_log ( rig_id, data, hashrate, uptime, shares, bad_shares) values($1,$2,$3,$4,$5,$6) RETURNING *', arr, (err, r) => {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            var id = r.rows[0].id;
+                            json.gpus.forEach((stats, index) => {
+                                var arr = [id, index, stats.tempature, stats.fan_speed, stats.hashrate];
+                                pg.client.query('INSERT INTO jjmm_gpu_log (log_id, gpu, tempature, fan_speed, hashrate) values ($1,$2,$3,$4,$5)', arr, (err, r) => {
+                                    if (err) {
+                                        console.log('ERROR: ' + err);
+                                    }
                                 });
-                            }
-                        });
+                            });
+                        }
+                    });
                 } catch (e) {
                     console.log(e);
 
