@@ -1,9 +1,9 @@
-const express = require('express');
 const sys = require('child_process');
 const os = require('os');
 const _ARGS = ["-G","-S","eth.pool.minergate.com:45791","-u","john@johnjanes.com"];
 
 var m1 = sys.spawn('ethminer.exe',_ARG);
+var overall = [];
 
 var watcher = {
     init: (app) => { 

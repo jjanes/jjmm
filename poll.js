@@ -19,6 +19,7 @@ tpl.configure( PATH_TO_TEMPLATES, {
 
 app.use(express.static('public'))
 
+try {
 app.get('/', (req, res) => {
     try {
         ret = tpl.render("index.html",{stats: stats});
@@ -29,6 +30,9 @@ app.get('/', (req, res) => {
 });
 
 app.listen(3000, () => console.log('Example app listening on port 3000!'))
+} catch(e) {
+    console.log("ERROR: "+ e);
+}
 
 function precisionRound(number, precision) {
     var factor = Math.pow(10, precision);
@@ -80,8 +84,7 @@ setInterval(() => {
             try {
                 var d = data.toString('utf8');
                 var a = (JSON.parse(d)).result;
-                console.log(JSON.stringify(a));
-                console.log('+++ ' +a[6]);
+     
                 var s = a[6].toString().split(/\s+/); 
 
                 var hashrates = a[3].toString().split(';');
@@ -127,7 +130,11 @@ setInterval(() => {
             } catch (e) {
                 console.log('ERROR: '+e);
             }
-            // client.destroy(); // kill client after server's response
+            try {
+                client.destroy(); // kill client after server's response
+            } catch (e) {
+
+            }
         });
 
         client.on('close', function () {
