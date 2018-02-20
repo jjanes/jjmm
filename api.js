@@ -46,6 +46,7 @@ const api = {
         this.app.use(function (req, res, next) {
             req.raw = '';
             req.on('data', function (data) { req.raw += data.toString('utf8'); });
+        
             next();
         });
 
@@ -60,6 +61,10 @@ const api = {
         this.app.use(express.static('public'))
 
         try {
+            this.app.post('/v1/charts/:rig_id', (req,res) => {
+
+
+            });
             this.app.post('/v1/log/:rig_id', (req, res) => {
                 var rig_id = parseInt(req.params.rig_id);
 
@@ -67,8 +72,8 @@ const api = {
 
                 try {
                     var json = JSON.parse(req.raw);
-                    var arr = [rig_id, req.raw, json.average, json.uptime, json.shares, json.bad_shares];
-                    pg.client.query('INSERT INTO jjmm_log ( rig_id, data, hashrate, uptime, shares, bad_shares) values($1,$2,$3,$4,$5,$6) RETURNING *', arr, (err, r) => {
+                    var arr = [rig_id, json.pool,json.average, json.uptime, json.shares, json.bad_shares];
+                    pg.client.query('INSERT INTO jjmm_log ( rig_id, pool, hashrate, uptime, shares, bad_shares) values($1,$2,$3,$4,$5,$6) RETURNING *', arr, (err, r) => {
                         if (err) {
                             console.log(err);
                         } else {

@@ -2,6 +2,7 @@ var net = require('net');
 var express = require('express');
 var tpl = require('nunjucks');
 var sqlite = require('sqlite3');
+var http = require('http');
 
 const HOST = '192.168.1.27';
 const PORT = 3000;
@@ -11,6 +12,10 @@ const PREC = 2;
 var app = express();
 
 var PATH_TO_TEMPLATES = './templates' ;
+
+
+const API_HOST = '127.0.1.75';
+const API_PORT = 3010;
 
 tpl.configure( PATH_TO_TEMPLATES, {
     autoescape: true,
@@ -70,7 +75,7 @@ function precisionRound(number, precision) {
 
 var stats;
 
-setInterval(() => {
+function poll() {
     try {
         var client = new net.Socket();
         client.connect(PORT, HOST, function () {
@@ -87,10 +92,13 @@ setInterval(() => {
      
                 var s = a[6].toString().split(/\s+/); 
 
+                console.log(JSON.stringify(a));
+
                 var hashrates = a[3].toString().split(';');
                 
                 stats = {
-                    uptime: fancyTimeFormat( a[1] ),
+                    pool: a[7],
+                    uptime: a[1],
                     gpus: []
                 };
                 
@@ -126,6 +134,30 @@ setInterval(() => {
                     stats.gpus[index].tempature = s[0];
                 });
 
+                try {
+                    var post_options = {
+                        host: API_HOST,
+                        port: API_PORT,
+                        path: '/v1/log/1',
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    };
+
+                    var req = http.request(post_options, (res) => {
+
+                    });
+
+                    req.on('error', (e) => {
+                        console.log('error ' + e);
+                    });
+
+                    req.write(JSON.stringify(stats));
+                    req.end();
+                } catch (e) {
+                    console.log(' @@@@ '+e);
+                }
+                stats.uptime = fancyTimeFormat( stats.uptime );
+
                 console.log(JSON.stringify(stats));
             } catch (e) {
                 console.log('ERROR: '+e);
@@ -142,4 +174,8 @@ setInterval(() => {
         });
 
     } catch (e) { }
-}, 3000);
+}
+
+poll();
+
+setInterval(() => { poll(); }, 20000);
