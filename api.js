@@ -1,6 +1,5 @@
 const { Client } = require('pg');
 const express = require('express');
-const tpl = require('nunjucks');
 const bodyParser = require('body-parser')
 
 const config = {
@@ -43,28 +42,45 @@ const api = {
     init: () => {
         this.app = express();
 
-        this.app.use(function (req, res, next) {
+        this.app.use((req, res, next) => {
             req.raw = '';
             req.on('data', function (data) { req.raw += data.toString('utf8'); });
         
             next();
         });
-
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({ extended: true }));
 
-        tpl.configure(PATH_TO_TEMPLATES, {
-            autoescape: true,
-            watch: true,
-        });
-
-        this.app.use(express.static('public'))
-
         try {
+            this.app.post('/v1/register/:rig_id', (req,res) => {
+                try {
+                    var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress).split(':')[3];
+                }  catch (e) {
+
+                }
+                try { 
+                    var rig_id = parseInt(req.params.rig_id);
+                    pg.client.query('SELECT * FROM jjmm_rigs WHERE id = $1 limit 1',[ rig_id ], (err, r) => {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            pg.client.query('UPDATE jjmm_rigs SET last_seen = now(), ip_address = $1 WHERE id = $2',[ ip, rig_id ]);
+                            console.log(JSON.stringify(r));
+                        }
+                    });
+
+
+                } catch (e) {
+                    console.log(e);
+                }
+                res.end('asdasd');
+            });
+        
             this.app.post('/v1/charts/:rig_id', (req,res) => {
 
 
             });
+
             this.app.post('/v1/log/:rig_id', (req, res) => {
                 var rig_id = parseInt(req.params.rig_id);
 

@@ -2,7 +2,7 @@ const sys = require('child_process');
 const os = require('os');
 const _ARGS = ["-G","-S","eth.pool.minergate.com:45791","-u","john@johnjanes.com"];
 
-var m1 = sys.spawn('ethminer.exe',_ARG);
+var m1 = sys.spawn('ethminer.exe',_ARGS);
 var overall = [];
 
 var watcher = {
@@ -15,15 +15,9 @@ var watcher = {
             var line;
             d.forEach((line) => {
                 line = line.trim();
-                // console.log(line);
-                var arr = line.split(/\s+/);
-                console.log(JSON.stringify(arr));
                 try {
-                    if (arr[0] == "m" && arr[2] == "Speed") {
-                        var speed = arr[3];
-                    } else if (arr[0] == 'i' && arr[2] == '**Accepted.') {
-
-                    }
+                    var arr = line.split(/\s+/);
+                    console.log(line);
                 } catch (e) {
 
                 }
