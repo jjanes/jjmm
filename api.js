@@ -24,6 +24,21 @@ const pg = {
             }
         });
     },
+    getInstructions: (rig_id, callback) => {
+        client.query('SELECT * FROM jjmm_instructions WHERE rig_id = $1 AND is_active = true', [rig_id], (err, res) => {
+            if (err) {
+
+            } else {
+            }
+           
+            if (typeof(callback)=="function") {
+                console.log('asd');
+                
+                callback.call(null, []);
+            }
+
+        });
+    },
     op: {
         insert: (table, values, callback) => {
             client.query('SELECT $1::text as message', ['Hello world!'], (err, res) => {
@@ -48,6 +63,7 @@ const api = {
         
             next();
         });
+
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -66,6 +82,9 @@ const api = {
                         } else {
                             pg.client.query('UPDATE jjmm_rigs SET last_seen = now(), ip_address = $1 WHERE id = $2',[ ip, rig_id ]);
                             console.log(JSON.stringify(r));
+                            pg.getInstructions(rig_id, (instruction) => {
+                                
+                            });
                         }
                     });
 
